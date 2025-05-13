@@ -26,11 +26,11 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Install SonarCloud Scanner
+      - name: Install SonarScanner CLI
         run: |
-          curl -sL https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip -o build-wrapper-linux-x86.zip
-          unzip build-wrapper-linux-x86.zip -d ~/sonar-scanner
-          export PATH="$PATH:~/sonar-scanner/build-wrapper-linux-x86"
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.1.0.4889-linux-x64.zip
+          unzip sonar-scanner-cli-7.1.0.4889-linux-x64.zip
+          echo "$(pwd)/sonar-scanner-7.1.0.4889-linux-x64/bin" >> $GITHUB_PATH
 
       - name: SonarCloud Scan
         env:
