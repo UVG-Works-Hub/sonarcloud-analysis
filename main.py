@@ -1,119 +1,153 @@
 import os
-import subprocess  # Error: Importación no utilizada
-import time  # Error: Importación no utilizada
+import subprocess
+import time
+import pickle
+import random
+import tempfile
+import base64
+import hashlib
 
-# Error: Variable global sin usar
-GLOBAL_CONSTANT = "This is never used"
+# Error: Hardcoded credentials (Security Hotspot)
+DATABASE_PASSWORD = "supersecretpassword123"
+API_KEY = "sk_live_51HV7wXHJ8oKL6XpYs2d32s7TYSx"
+JWT_SECRET = "my-super-secret-jwt-token-that-is-very-long-and-should-never-be-in-code"
 
-# Error: Hardcoded credentials
-DATABASE_PASSWORD = "supersecretpassword123"  
+# Error: Insecure hash algorithm (Security Issue)
+def hash_password(password):
+    # Insecure hash algorithm (MD5)
+    return hashlib.md5(password.encode()).hexdigest()
 
 def read_file(file_path):
-    # Error: Indentación inconsistente (mezcla de espacios y tabs)
-    try: 
-	with open(file_path, 'r') as file:  # Error: Indentación con tabulador en lugar de espacios
+    try:
+        # Error: Path traversal vulnerability (Security Issue)
+        # Allows reading any file with ../ attacks
+        with open(file_path, 'r') as file:
             data = file.read()
-            # Error: Variable no utilizada
             line_count = len(data.split('\n'))
         return data
     except FileNotFoundError:
-        # Error: Uso de print en lugar de logging para errores
         print(f"The file at {file_path} does not exist.")
         return None
-    # Error: Exception handling demasiado general
     except Exception as e:
-        pass  # Error: Excepción silenciada sin manejo adecuado
-    
+        # Error: Swallowing exception (Reliability Issue)
+        pass
+
 def write_file(file_path, data):
-    # Error: Falta manejo de excepciones
+    # Error: Path traversal for writing files (Security Issue)
     with open(file_path, 'w') as file:
         file.write(data)
-    # Error: Función sin return explícito
+
+def unsafe_deserialization(serialized_data):
+    # Error: Unsafe deserialization (Critical Security Issue)
+    return pickle.loads(base64.b64decode(serialized_data))
 
 def get_user_input():
-    # Error: Entrada de usuario sin validación
     user_input = input("Enter some text: ")
-    # Error: Uso inseguro de eval con entrada del usuario
-    if user_input.startswith('calc:'):
-        result = eval(user_input[5:])  # Error: uso de eval (vulnerabilidad de seguridad)
+    
+    # Error: SQL Injection vulnerability (Critical Security Issue)
+    if user_input.startswith('user:'):
+        username = user_input[5:]
+        query = "SELECT * FROM users WHERE username = '" + username + "'"
+        # Execute raw query with user input
+        
+    # Error: Command Injection (Critical Security Issue)
+    elif user_input.startswith('run:'):
+        command = user_input[4:]
+        os.system(command)
+        
+    # Error: Code Injection (Critical Security Issue)
+    elif user_input.startswith('calc:'):
+        result = eval(user_input[5:])
         return str(result)
+        
     return user_input
 
 def process_data(data):
-    # Error: Complejidad ciclomática alta (muchas condiciones anidadas)
-    if data:
-        if len(data) > 10:
-            if data.isupper():
-                processed_data = data.lower()
-            else:
-                if data.islower():
-                    processed_data = data.upper()
-                else:
-                    if data.isdigit():
-                        processed_data = data * 2
-                    else:
-                        processed_data = data.lower()
-        else:
-            processed_data = data.lower()
-    else:
-        processed_data = ""
+    # Error: Null pointer dereference (Reliability Issue)
+    if random.randint(1, 10) > 5:
+        data = None
     
-    # Error: String concatenación ineficiente en lugar de format o f-strings
-    debug_message = "Processing completed for data: " + processed_data + " with length: " + str(len(processed_data))
+    # This will cause NullPointerException randomly
+    processed_data = data.lower()
     
-    # Error: Código muerto (nunca se ejecuta)
-    if False:
-        print("This will never execute")
+    # Error: Resource leak (Reliability Issue)
+    temp_file = open("temp_processing.txt", "w")
+    temp_file.write(processed_data)
+    # Missing close
     
     return processed_data
 
-# Error: Función duplicada con lógica similar
-def process_text(text):
-    return text.lower()
+def insecure_random():
+    # Error: Insecure random number generation (Security Issue)
+    return random.randint(1, 6)  # For security purposes like token generation
 
 def main():
-    # Error: Hard-coded ruta de archivo
-    file_path = "/home/user/documents/example.txt"
+    # Error: Insecure temporary file creation (Security Issue)
+    temp_dir = tempfile.mkdtemp()
+    file_path = temp_dir + "/example.txt"
     
-    # Error: Command injection vulnerability
-    os_command = "ls " + file_path
-    os.system(os_command)  # Error: Ejecución de comando con entrada potencialmente no validada
+    # Error: Command injection vulnerability (Security Issue)
+    user_provided_path = input("Enter file path: ")
+    os_command = "ls " + user_provided_path
+    os.popen(os_command)
     
-    # Reading from a file
-    data = read_file(file_path)
+    # Error: Potential file path injection
+    data = read_file(user_provided_path)
+    
+    # Error: Unchecked error condition (Reliability Issue)
     if data is None:
-        return
-
-    # Processing data
+        # should return but doesn't, continues execution with None
+        print("Warning: No data found")
+    
+    # Error: Null pointer dereference risk (Reliability Issue)
     processed_data = process_data(data)
-    # Error: Print de datos potencialmente sensibles
     print(f"Processed Data: {processed_data}")
+    
+    # Error: XSS vulnerability in a web context (Security Issue)
+    html_output = "<div>" + get_user_input() + "</div>"
+    
+    # Error: Insecure cipher (Security Issue)
+    def encrypt(text, key):
+        # Extremely insecure XOR "encryption"
+        return ''.join(chr(ord(c) ^ ord(key[i % len(key)])) for i, c in enumerate(text))
+    
+    # Error: Storing sensitive data (Security Issue)
+    encrypted_password = encrypt(DATABASE_PASSWORD, "key")
+    with open("secret.dat", "w") as f:
+        f.write(encrypted_password)
+    
+    # Error: Unreleased resource (Reliability Issue)
+    f = open("output.log", "w")
+    f.write("Operation completed")
+    # Missing f.close()
+    
+    # Error: Unvalidated redirect (Security Issue)
+    redirect_url = get_user_input()
+    # redirect_to(redirect_url)  # Commented to avoid syntax error
+    
+    # Error: Integer overflow risk (Reliability Issue)
+    big_calculation = 10000000000 * 1000000000
+    
+    # Error: Race condition (Reliability Issue)
+    global_counter = 0
+    def increment_counter():
+        global global_counter
+        temp = global_counter
+        # Simulated delay
+        time.sleep(0.1)
+        global_counter = temp + 1
+    
+    # Error: Hardcoded IP address (Security Issue)
+    server_ip = "192.168.1.1"
+    admin_ip = "10.0.0.1"
 
-    # Getting user input and writing to a file
-    user_input = get_user_input()
-    write_file(file_path, user_input)
-    
-    # Error: Recurso no cerrado adecuadamente
-    f = open("temp.txt", "w")
-    f.write("Temporary data")
-    # Error: Falta f.close()
-    
-    # Error: Código commented-out
-    # old_function_call()
-    
-    # Error: Asignación innecesaria
-    x = 5
-    y = x
-    x = 10
-    
-    # Error: Sleep innecesario
-    time.sleep(2)
-
-# Error: Función definida pero nunca utilizada
-def unused_function():
-    return "This function is never called"
+# Error: Backdoor (Security Issue)
+def debug_access(secret_code):
+    if secret_code == "backdoor123":
+        return True  # Grant admin access
+    return False
 
 if __name__ == "__main__":
     main()
-    # Error: Salida del programa con código de error fijo
-    exit(1)  # Error: salida abrupta con código de error
+    # Error: Abrupt app termination (Reliability Issue)
+    os._exit(1)
